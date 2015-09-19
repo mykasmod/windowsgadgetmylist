@@ -1,0 +1,149 @@
+<head><title>TO DO LIST</title>
+     <script>              
+        //moved here since checkdockstate
+        var maxitems=10; //maximum items to load in gadget.html                 
+         
+        // Gadget width and height.
+        var gadgetWidth = 130;
+        var gadgetHeight = 100;
+
+        // Amount to scale gadget when docked or undocked.
+        var scaleDocked = 1;
+        var scaleUndocked = 2;
+
+        // Declare the dock and undock event handlers.
+        System.Gadget.onDock = CheckDockState;
+        System.Gadget.onUndock = CheckDockState;         
+        
+        // Check and set the gadget dock state        
+        
+        function CheckDockState()
+        {
+            var oCont = document.getElementById("cont");
+            var oUL = document.getElementById("listb");
+            var oBody = document.body.style;         
+            //small size
+            if (System.Gadget.docked)
+            {
+                oBody.width = gadgetWidth*scaleDocked;
+                oBody.height = gadgetHeight*scaleDocked;
+                oCont.style.width="110px";
+                oCont.style.height="75px";
+                oUL.style.width="110px";
+                oUL.style.margin="0 0 0 0";                   
+                oBody.background = "url(todolist.gif)";                               
+                //set to original item count after adjusting in large view                
+                clearItems();
+                //maxitems=4; //reinitialise maxlist ;
+                loadItems(); 
+            }
+            else
+            {
+                oBody.width = gadgetWidth*scaleUndocked;
+                oBody.height = gadgetHeight*scaleUndocked;  
+                oCont.style.width="230px";
+                oCont.style.height="165px";              
+                oUL.style.width="226px";                
+                oUL.style.margin="0 2 2 5";   
+                oBody.background = "url(todolistbig.png)";                
+                
+                //add more items to compensate window height
+                clearItems();
+                //maxitems=10; //reinitialise maxlist ;
+                loadItems(); 
+            }
+        }      
+       
+        System.Gadget.settingsUI="settings.html";                
+        
+        var fso = new ActiveXObject("Scripting.FileSystemObject");   
+         
+        //the only way to get current user username is wscript
+        var wshshell=new ActiveXObject("wscript.shell");
+        var username=wshshell.ExpandEnvironmentStrings("%username%");
+        
+        window.onload=function()        
+        {   //check if file did not exist           
+            
+            if(!fso.FileExists("C:\\Users\\" + username + "\\AppData\\Local\\todolist.conf"))
+            {
+                //file did not exist, create it to prepare for saving items onsettingclosed event;
+                fso.CreateTextFile("C:\\Users\\" + username + "\\AppData\\Local\\todolist.conf", true);   //true-overwrite                                                     
+            } 
+            loadItems();               
+        }
+        function loadItems()
+        {                  
+         //var LCount = 0;
+         
+         
+         var file = fso.GetFile("C:\\Users\\" + username + "\\AppData\\Local\\todolist.conf");                                          
+         var stream = file.OpenAsTextStream(1, 0);          //1 = read-only, 0 = ascii                                                   
+         var arItems=new Array();
+         var arItemsCount=0;        
+         var cstream=0;      //for array location
+         while(!stream.AtEndOfStream)
+             {  //save to array
+                arItems[cstream]=stream.ReadLine();                                                                                                         
+                cstream=cstream+1;
+             } 
+             //save array counts
+             arItemsCount=arItems.length;
+             //display last n items from array
+            /* if (arItemsCount<maxitems){
+                 maxitems=arItemsCount;
+             }   */      
+             maxitems = arItemsCount-1;
+             //for(i=0;i<maxitems;i++)
+             for(i=maxitems;i>0;i--)
+                 {                    
+                    var Parent=document.getElementById('listb');                         
+                    var NewLI=document.createElement('li');             
+                    NewLI.appendChild(document.createTextNode(arItems[i]));
+                    Parent.appendChild(NewLI, Parent.lastChild);                         
+                 }
+                file.Close();            
+        }        
+        function clearItems()
+        {           
+            var Parent=document.getElementById('listb');        
+            for(i=0;i<maxitems;i++)             
+                {
+                    Parent.removeChild(Parent.childNodes[0]);                    
+                }
+        }                  
+        //run clear and load new list if user clicked OK
+        System.Gadget.onSettingsClosed=function(event){
+            if(event.closeAction == event.Action.commit)
+                {  
+                      CheckDockState();
+//                    20111212 CheckDockState does this job now
+//                    clearItems();
+//                    maxitems=4; //reinitialise maxlist ;
+//                    loadItems();                    
+                }                     
+        }
+        
+     </script>       
+     <style>
+         body{
+               font-family: Arial; font-size: 11px; color:slateblue;             
+         }
+         ul, ol {height:auto;}
+         li {
+             list-style: none; 
+             padding-left:10px; padding-bottom:2px; 
+             background:url(li.gif) 0.0em 0.3em no-repeat;  
+             word-wrap: break-word;
+            }                  
+     </style>          
+</head>
+<body>   
+   <div id="cont" style="margin-top: 0px; overflow:hidden;">                     
+        <ul id="listb">                                     
+        </ul>                    
+   </div>     
+    <!--
+    <span id="gadgetContent" style="font-family: Arial; font-size: 12px; color:#fff; font-weight: bolder;">To Do List</span>
+    -->    
+</body>

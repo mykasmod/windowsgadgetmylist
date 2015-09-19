@@ -1,0 +1,109 @@
+<html>
+ <head>     
+     <script>                 
+         var LCount=0; //number of li items
+         
+         var fso = new ActiveXObject("Scripting.FileSystemObject");
+         var file;        
+         //the only way to get current user username is wscript
+         var wshshell=new ActiveXObject("wscript.shell");
+         var username=wshshell.ExpandEnvironmentStrings("%username%");        
+         
+         function removeLI(object) 
+         { 
+            object.parentNode.parentNode.removeChild(object.parentNode);
+            LCount=LCount-1;
+         }        
+         function addLI(id)
+         {
+            var Parent=document.getElementById(id);
+            var NewLI=document.createElement('li');                                               
+            
+            //create new li item. use this version if without strike out
+            NewLI.appendChild(document.createTextNode(document.getElementById('txtitem').value));
+            Parent.appendChild(NewLI, Parent.lastChild);                                       
+            LCount = LCount + 1;
+            
+            //create del button
+            var NewBU=document.createElement("<button type='button' onclick='removeLI(this)' style='height:18px; width:18px; margin-right:2px'>");                                     
+            var LI=document.getElementsByTagName('LI')[LCount-1]; //find the last item 
+            LI.insertBefore(NewBU, LI.lastChild); //insert button in this list
+            //add image to the button
+            var NewIMG=document.createElement("<img src='del.gif' alt='Delete this item; Click the item and use arrow key to scroll up/down'>")
+            var BU=document.getElementsByTagName('button')[LCount-1];
+            BU.appendChild(NewIMG);            
+                      
+         }                          
+         window.onload=function()
+         {                
+                 
+                 file = fso.GetFile("C:\\Users\\" + username + "\\AppData\\Local\\todolist.conf");                                   
+                 var stream = file.OpenAsTextStream(1, 0);          //1 = read-only, 0 = ascii
+                 var s = "";                                  
+               
+                 while(!stream.AtEndOfStream)
+                     {                                                 
+                        s = stream.ReadLine();                                                 
+                        var Parent=document.getElementById('listb');                         
+                        var NewLI=document.createElement('li');             
+                        NewLI.appendChild(document.createTextNode(s));
+                        Parent.appendChild(NewLI, Parent.lastChild);      
+                        LCount = LCount + 1;              
+                        
+                        //add del button to list
+                        var NewBU=document.createElement("<button type='button' onclick='removeLI(this)' style='height:18px; width:18px; margin-right:2px'>");                                     
+                        var LI=document.getElementsByTagName('LI')[LCount-1];                                                                       
+                       
+                        //insert button in this list
+                        LI.insertBefore(NewBU, LI.lastChild);
+                        
+                        //add image to the button
+                        var NewIMG=document.createElement("<img src='del.gif' alt='Delete this item; Click the item and use arrow key to scroll up/down'>")
+                        var BU=document.getElementsByTagName('button')[LCount-1];
+                        BU.appendChild(NewIMG);                                                                    
+                     }                               
+                     file.Close();
+         }                  
+         
+         System.Gadget.onSettingsClosing=function(event)
+         {
+             if(event.closeAction == event.Action.commit)
+                {                   
+                    file = fso.CreateTextFile("C:\\Users\\" + username + "\\AppData\\Local\\todolist.conf", true);   //true-overwrite                                  
+                    
+                    // Get the UL
+                    var ul = document.getElementById("listb");
+                    // Get the LI in the UL
+                    var li = ul.getElementsByTagName("li");
+                    // Iterate through the LI's
+                    
+                    for( var i = 0; i < li.length; i++ )
+                    {
+                            var liChild = li.item(i).childNodes;
+                            file.writeline(liChild.item(1).nodeValue);    //li child index 1 - the 2nd child is what we're after                                                                        
+                            
+                    }                                                                          
+                    file.Close();
+                 }
+                 event.cancel = false;
+         }        
+     </script>
+     <style>
+         ul, ol { margin-left:0px; padding-left:0px; width:auto; height:auto;} /*width should be auto */
+         li {
+             list-style: none; width: 215px; word-wrap: break-word; /*width must be less than the size of div*/
+             /* padding-left:10px; padding-bottom:2px; */
+             /* background:url(li.gif) 0.0em 0.3em no-repeat; */
+            }         
+     </style>     
+ </head>
+ <body style="width:230px; height:200px; background-color:#0d1528; color:slateblue; font-family: Arial; font-size:11px; overflow: hidden;">    
+   <div id="cont" style="height: 155px; width: 237px; margin-bottom: 2px; overflow: auto;"> <!--div is fixed to hide right scroll bar -->                             
+        <ul id="listb">                                     
+        </ul>                    
+   </div> 
+     <input id="txtitem" type="text" size="26"/>   
+     <button type="button" id ="btnADD" onclick="addLI('listb')" style="height:20px; width:20px; margin-left:7px; margin-bottom:1px;"><img src="add.gif"></button>
+     <!-- <span style="font-size: smaller;">&nbsp; &copy;MMA</span>  -->
+ </body>
+</html>

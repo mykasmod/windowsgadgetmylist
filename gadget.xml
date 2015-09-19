@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<gadget>
+    <name>To Do List</name>    
+    <version>1.0.0.0</version>  
+    <author name="Michael Asmod">
+    <info url="computertechnologyandelectronics.blogspot.com" />    
+    </author>
+    <description>
+        Description: To Do List. Add a note to help you remember.
+    </description>
+    <icons>
+    <icon height="48" width="48" src="icon.gif" />
+    </icons>
+    <hosts>
+        <host name="sidebar">
+            <autoscaleDPI>true</autoscaleDPI>
+            <base type="HTML" apiVersion="1.0.0" src="gadget.html" />
+            <permissions>Full</permissions>
+            <platform minPlatformVersion="1.0"/>            
+        </host>        
+    </hosts>    
+</gadget>
